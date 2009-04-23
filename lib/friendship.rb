@@ -19,6 +19,7 @@ class Friendship < ActiveRecord::Base
   # associations
   belongs_to :user
   belongs_to :friend, :class_name => 'User', :foreign_key => 'friend_id'
+  belongs_to :message, :class_name => "FriendshipMessage", :foreign_key => "friendship_message_id"
   
   # callback
   after_destroy do |f|

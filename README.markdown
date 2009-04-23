@@ -11,10 +11,10 @@ Instalation
 
 2) Generate a migration with `script/generate migration create_friendships` and add the following code:
 
-	class CreateFriendships < ActiveRecord::Migration
+	class CreateFriendshipsAndMessage < ActiveRecord::Migration
 	  def self.up
 	    create_table :friendships do |t|
-	      t.references :user, :friend
+	      t.references :user, :friend, :friendship_message
 	      t.datetime :requested_at, :accepted_at, :null => true, :default => nil
 	      t.string :status
 	    end
@@ -22,10 +22,15 @@ Instalation
 	    add_index :friendships, :user_id
 	    add_index :friendships, :friend_id
 	    add_index :friendships, :status
+	
+			create_table :friendship_messages do |t|
+				t.string :body
+			end
 	  end
 
 	  def self.down
 	    drop_table :friendships
+	    drop_table :friendship_messages
 	  end
 	end
 
@@ -44,23 +49,27 @@ Usage
 	mary = User.find_by_login 'mary'
 	paul = User.find_by_login 'paul'
 
-	# john wants to be friend with mary
+	# John wants to be friend with Mary
 	# always return a friendship object
-	john.be_friends_with(mary)
+	john.be_friends_with(mary, "Hi Mary! I have worked with you on Meroy Merlin!")
 
 	# are they friends?
-	john.friends?(mary)
+	john.friends?(mary) ==> false
 
 	# get the friendship object
 	john.friendship_for(mary)
-
-	# mary accepts john's request if it exists;
-	# makes a friendship request otherwise.
+	
+	# Mary accepts John's request if it exists...
+	mary.accept_friendship_with(john)
+	mary.friends?(john) ==> true
+	
+	# either if Mary request John's friendship, then they will be friends automatically.
 	mary.be_friends_with(john)
-
-	# check if paul is mary's friend
-	mary.friends?(paul)
-
+	mary.friends?(john) ==> true
+	
+	# Mary can reject John's friendship.
+	mary.remove_friendship_with(john)
+	
 	# check if a user is the current user, so it can
 	# be differently presented
 	mary.friends.each {|friend| friend.is?(current_user) }
@@ -69,18 +78,15 @@ Usage
 	# the following methods are available
 	friendship.accept!
 	
-	# if you're using has_paginate plugin, you can use it:
-	mary.friends.paginate(:page => 3, :limit => 10)
-	
 	# the be_friends_with method returns 2 params: friendship object and status.
 	# the friendship object will be present only when the friendship is created
 	# (that is, when is requested for the first time)
-	# STATUS_ALREADY_FRIENDS		 # => users are already friends
-	# STATUS_ALREADY_REQUESTED		 # => user has already requested friendship
-	# STATUS_IS_YOU					 # => user is trying add himself as friend
-	# STATUS_FRIEND_IS_REQUIRED      # => friend argument is missing
-	# STATUS_FRIENDSHIP_ACCEPTED     # => friendship has been accepted
-	# STATUS_REQUESTED				 # => friendship has been requested
+	# STATUS_ALREADY_FRIENDS       # => users are already friends
+	# STATUS_ALREADY_REQUESTED     # => user has already requested friendship
+	# STATUS_IS_YOU                # => user is trying add himself as friend
+	# STATUS_FRIEND_IS_REQUIRED    # => friend argument is missing
+	# STATUS_FRIENDSHIP_ACCEPTED   # => friendship has been accepted
+	# STATUS_REQUESTED             # => friendship has been requested
 	
 	friendship, status = mary.be_friends_with(john)
 	

@@ -1,4 +1,4 @@
-require "spec_helper"
+require "#{File.dirname(__FILE__)}/spec_helper"
 
 # unset models used for testing purposes
 Object.unset_class('User')
@@ -174,15 +174,46 @@ describe "has_friends" do
     
     it "should create friendships" do
       doing {
-        @vader.be_friends_with(@luke)
+        doing {
+          friendship, status = @vader.be_friends_with(@luke, "Luke, I'm your father!")
         
-        @vader.friendships.count.should == 1
-        @luke.friendships.count.should == 1
-      }.should change(Friendship, :count).by(2)
+          @vader.friendships.count.should == 1
+          @luke.friendships.count.should == 1
+          status.should == Friendship::STATUS_REQUESTED
+          friendship.message.body.should == "Luke, I'm your father!"
+        
+        }.should change(Friendship, :count).by(2)
+      }.should change(FriendshipMessage, :count).by(1)
+    end
+  end
+  
+  describe FriendshipMessage do
+    it "should require a body" do
+      @message = FriendshipMessage.new
+      @message.should_not be_valid
+      @message.errors[:body].should == "can't be blank"
     end
   end
   
   describe Friendship do
+    describe "structure" do
+      it "should belong_to user" do
+        @friendship = Friendship.new(:user => @vader)
+        @friendship.user.should == @vader
+      end
+      
+      it "should_belong_to friend" do
+        @friendship = Friendship.new(:friend => @luke)
+        @friendship.friend.should == @luke
+      end
+      
+      it "should belong_to message" do
+        @message = FriendshipMessage.new :body => "Luke, I'm your father!"
+        @friendship = Friendship.new(:message => @vader_message_for_luke)
+        @friendship.message == @vader_message_for_luke
+      end
+    end
+    
     it "should be pending status" do
       @friendship = Friendship.new(:status => 'pending')
       @friendship.should be_pending
