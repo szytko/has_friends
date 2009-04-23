@@ -65,6 +65,21 @@ module SimplesIdeias
         self.id == friend.id
       end
       
+      def remove_friendship_with(friend)
+        [friendship_for(friend), friend.friendship_for(self)].compact.each do |friendship|
+          friendship.destroy if friendship
+        end
+      end
+      
+      def accept_friendship_with(friend)
+        if self.friendship_for(friend).pending?
+          [friendship_for(friend), friend.friendship_for(self)].compact.each do |friendship|
+            friendship.accept! unless friendship.accepted?
+          end 
+        else
+          raise YouCanNotAcceptARequestFriendshipError
+        end
+      end      
       private
         def destroy_all_friendships
           Friendship.delete_all({:user_id => id})

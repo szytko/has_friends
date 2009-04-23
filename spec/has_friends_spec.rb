@@ -22,6 +22,60 @@ describe "has_friends" do
     it "should respond to friends? method" do
       @vader.should respond_to(:friends?)
     end
+    
+    it "should respond to accept_friendship_with" do
+      @vader.should respond_to(:accept_friendship_with)
+    end
+    
+    it "should respond to remove_friendship_with" do
+      @vader.should respond_to(:remove_friendship_with)
+    end
+  end
+  
+  describe "user" do
+    before(:each) do
+      #requesting friendship between @vader and @luke
+      @vader.be_friends_with(@luke)
+    end
+    
+    it "should accept a friendship" do
+      @luke.accept_friendship_with(@vader)
+      
+      @luke.reload
+      @vader.reload
+      
+      @vader.friends.should == [@luke]
+      @luke.friends.should == [@vader]
+      @vader.friends_count.should == 1
+      @luke.friends_count.should == 1
+    end
+    
+    it "should reject when user try accept his friendship request" do
+      lambda { @vader.accept_friendship_with(@luke) }.should raise_error(YouCanNotAcceptARequestFriendshipError)
+      
+      @luke.reload
+      @vader.reload
+
+      @vader.friends.should == []
+      @luke.friends.should == []
+      @vader.friends_count.should == 0
+      @luke.friends_count.should == 0
+    end
+    
+    it "should remove a friendship" do
+      #make @vader and @luke friends
+      @luke.be_friends_with(@vader)
+      
+      @vader.remove_friendship_with(@luke)
+      
+      @luke.reload
+      @vader.reload
+
+      @vader.friends.should == []
+      @luke.friends.should == []
+      @vader.friends_count.should == 0
+      @luke.friends_count.should == 0
+    end
   end
   
   describe "friends" do

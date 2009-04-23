@@ -7,10 +7,14 @@ class Friendship < ActiveRecord::Base
   STATUS_FRIENDSHIP_ACCEPTED = 5
   STATUS_REQUESTED           = 6
   
+  FRIENDSHIP_ACCEPTED = "accepted"
+  FRIENDSHIP_PENDING = "pending"
+  FRIENDSHIP_REQUESTED = "requested"
+  
   # scopes
-  named_scope :pending, :conditions => {:status => 'pending'}
-  named_scope :accepted, :conditions => {:status => 'accepted'}
-  named_scope :requested, :conditions => {:status => 'requested'}
+  named_scope :pending, :conditions => {:status => FRIENDSHIP_PENDING}
+  named_scope :accepted, :conditions => {:status => FRIENDSHIP_ACCEPTED}
+  named_scope :requested, :conditions => {:status => FRIENDSHIP_REQUESTED}
   
   # associations
   belongs_to :user
@@ -22,19 +26,21 @@ class Friendship < ActiveRecord::Base
   end
   
   def pending?
-    status == 'pending'
+    status == FRIENDSHIP_PENDING
   end
   
   def accepted?
-    status == 'accepted'
+    status == FRIENDSHIP_ACCEPTED
   end
   
   def requested?
-    status == 'requested'
+    status == FRIENDSHIP_REQUESTED
   end
 
   def accept!
-    User.increment_counter(:friends_count, user.id) unless accepted?
-    update_attribute(:status, 'accepted')
+    unless accepted?
+      User.increment_counter(:friends_count, user.id)
+      update_attribute(:status, FRIENDSHIP_ACCEPTED)
+    end
   end
 end
