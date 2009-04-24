@@ -58,7 +58,7 @@ module SimplesIdeias
       
       def friends?(friend)
         friendship = friendship_for(friend)
-        friendship && friendship.accepted?
+        !!(friendship && friendship.accepted?)
       end
       
       def friendship_for(friend)
