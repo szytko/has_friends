@@ -21,7 +21,7 @@ class Friendship < ActiveRecord::Base
   belongs_to :friend, :class_name => 'User', :foreign_key => 'friend_id'
   belongs_to :message, :class_name => "FriendshipMessage", :foreign_key => "friendship_message_id"
   
-  has_many :friendship_relations, :readonly => true
+  has_many :friendship_relations, :class_name => "FriendshipRelationType", :readonly => true
   has_many :relations, :through => :friendship_relations
   
   # callback
@@ -55,7 +55,7 @@ class Friendship < ActiveRecord::Base
     end
     
     new_relations.each do |r|
-      relation = Relation.find_or_create_by_name(r.to_s)
+      relation = RelationType.find_or_create_by_name(r.to_s)
       self.relations << relation unless self.relations.include?(relation)
     end
   end

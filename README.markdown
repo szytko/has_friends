@@ -4,6 +4,22 @@ has_friends
 **ATTENTION:** This is a new simpler implementation. If you want to use the previous version,
 get the 1.0 tag.
 
+NOTE: You should have a User model. You should also have a `friends_count` column
+on your model. Otherwise, this won't work! You can add as following:
+
+`script/generate migration add_friends_count_to_user friends_count:integer`
+
+	class CreateFriendships < ActiveRecord::Migration
+	  def self.up
+	    add_column :users, :friends_count, :integer, :default => 0, :null => false
+	  end
+
+	  def self.down
+	    remove_column :users, :friends_count
+	  end
+	end
+
+
 Instalation
 -----------
 
@@ -11,20 +27,20 @@ Instalation
 
 2) Generate following migrations with respective codes:
 
-a) `script/generate migration create_relations name:string
+a) `script/generate migration create_relations`
 
-	class CreateRelations < ActiveRecord::Migration
+	class CreateRelationTypes < ActiveRecord::Migration
 		def self.up
-			create_table :relations do |t|
+			create_table :relation_types do |t|
 		    t.string :name
 		    t.timestamps
 			end
 		end
 		
-		add_index  :relations, :name
+		add_index :relation_types, :name
 		
 		def self.down
-    	drop_table :relations
+    	drop_table :relation_types
 		end
 	end
 	
@@ -50,33 +66,33 @@ b) `script/generate migration create_friendships`
 	
 c) `script/generate migration create_friendship_messages`
 
-class CreateFriendshipMessages < ActiveRecord::Migration
-  def self.up
-    create_table :friendship_messages do |t|
-	    t.string :body
-	    t.timestamps
+	class CreateFriendshipMessages < ActiveRecord::Migration
+	  def self.up
+	    create_table :friendship_messages do |t|
+		    t.string :body
+		    t.timestamps
+		  end
 	  end
-  end
 
-  def self.down
-    drop_table :friendship_messages
-  end
-end
+	  def self.down
+	    drop_table :friendship_messages
+	  end
+	end
 
 d) `script/generate migration create_friendship_relations`
 
-class CreateFriendshipRelations < ActiveRecord::Migration
-  def self.up
-    create_table :friendship_relations do |t|
-	    t.references :relation, :friendship
-	    t.timestamps
+	class CreateFriendshipRelationTypes < ActiveRecord::Migration
+	  def self.up
+	    create_table :friendship_relation_types do |t|
+		    t.references :relation, :friendship
+		    t.timestamps
+		  end
 	  end
-  end
 
-  def self.down
-    drop_table :friendship_relations
-  end
-end
+	  def self.down
+	    drop_table :friendship_relation_types
+	  end
+	end
 
 3) Run the migrations with `rake db:migrate`
 
@@ -98,7 +114,7 @@ Usage
 	john.be_friends_with(mary, "Hi Mary! I have worked with you on Meroy Merlin!")
 	
 	# Creating a new Relation kind
-	Relation.create(:name => "coworker")
+	RelationType.create(:name => "coworker")
 	
 	# You can pass kind of relationship, when...
 	john.be_friends_with(mary, "Hi Mary! I have worked with you on Meroy Merlin!", [:coworker])
@@ -161,20 +177,6 @@ Usage
 	  # ...
 	end
 
-NOTE: You should have a User model. You should also have a `friends_count` column
-on your model. Otherwise, this won't work! You can add as following:
-
-1) Create a new migration with `script/generate migration add_friends_count_to_user`:
-
-	class CreateFriendships < ActiveRecord::Migration
-	  def self.up
-	    add_column :users, :friends_count, :integer, :default => 0, :null => false
-	  end
-
-	  def self.down
-	    remove_column :users, :friends_count
-	  end
-	end
 
 LICENSE:
 --------

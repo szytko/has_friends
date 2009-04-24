@@ -24,12 +24,12 @@ ActiveRecord::Schema.define(:version => 0) do
     t.timestamps
   end
   
-  create_table :relations do |t|
+  create_table :relation_types do |t|
     t.string :name
     t.timestamps
   end
 
-  create_table :friendship_relations do |t|
+  create_table :friendship_relation_types do |t|
     t.references :relation, :friendship
     t.timestamps
   end

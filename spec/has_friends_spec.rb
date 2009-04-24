@@ -193,14 +193,14 @@ describe "has_friends" do
       doing {
         doing {
           friendship, status = @vader.be_friends_with(@luke, nil, [:met, :friend])
-        }.should change(FriendshipRelation, :count).by(4)
-      }.should_not change(Relation, :count)
+        }.should change(FriendshipRelationType, :count).by(4)
+      }.should_not change(RelationType, :count)
     end
     
     it "should create friendship with new relations" do
       doing {
         friendship, status = @vader.be_friends_with(@luke, nil, [:parent, :met])
-      }.should change(Relation, :count).by(1)
+      }.should change(RelationType, :count).by(1)
     end
   end
   
@@ -212,9 +212,9 @@ describe "has_friends" do
     end
   end
   
-  describe Relation do
+  describe RelationType do
     it "should require a name" do
-      @relation_type = Relation.new
+      @relation_type = RelationType.new
       @relation_type.should_not be_valid
       @relation_type.errors[:name].should == "can't be blank"
     end
@@ -321,16 +321,16 @@ describe "has_friends" do
     end
   end
   
-  describe FriendshipRelation do
+  describe FriendshipRelationType do
     describe "structure" do
       it "should belong_to :friendship" do
         @friendship = Friendship.new
-        @friendship_relation = FriendshipRelation.new :friendship => @friendship
+        @friendship_relation = FriendshipRelationType.new :friendship => @friendship
         @friendship_relation.friendship.should == @friendship
       end
       it "should belong_to :relation" do
-        @relation = Relation.new
-        @friendship_relation = FriendshipRelation.new :relation => @relation
+        @relation = RelationType.new
+        @friendship_relation = FriendshipRelationType.new :relation => @relation
         @friendship_relation.relation.should == @relation
       end
     end
