@@ -9,9 +9,28 @@ Instalation
 
 1) Install the plugin with `script/plugin install git://github.com/fnando/has_friends.git`
 
-2) Generate a migration with `script/generate migration create_friendships` and add the following code:
+2) Generate following migrations with respective codes:
 
-	class CreateFriendshipsAndMessage < ActiveRecord::Migration
+a) `script/generate migration create_relations name:string
+
+	class CreateRelations < ActiveRecord::Migration
+		def self.up
+			create_table :relations do |t|
+		    t.string :name
+		    t.timestamps
+			end
+		end
+		
+		add_index  :relations, :name
+		
+		def self.down
+    	drop_table :relations
+		end
+	end
+	
+b) `script/generate migration create_friendships`
+
+	class CreateFriendships < ActiveRecord::Migration
 	  def self.up
 	    create_table :friendships do |t|
 	      t.references :user, :friend, :friendship_message
@@ -22,17 +41,42 @@ Instalation
 	    add_index :friendships, :user_id
 	    add_index :friendships, :friend_id
 	    add_index :friendships, :status
-	
-			create_table :friendship_messages do |t|
-				t.string :body
-			end
 	  end
 
 	  def self.down
 	    drop_table :friendships
-	    drop_table :friendship_messages
 	  end
 	end
+	
+c) `script/generate migration create_friendship_messages`
+
+class CreateFriendshipMessages < ActiveRecord::Migration
+  def self.up
+    create_table :friendship_messages do |t|
+	    t.string :body
+	    t.timestamps
+	  end
+  end
+
+  def self.down
+    drop_table :friendship_messages
+  end
+end
+
+d) `script/generate migration create_friendship_relations`
+
+class CreateFriendshipRelations < ActiveRecord::Migration
+  def self.up
+    create_table :friendship_relations do |t|
+	    t.references :relation, :friendship
+	    t.timestamps
+	  end
+  end
+
+  def self.down
+    drop_table :friendship_relations
+  end
+end
 
 3) Run the migrations with `rake db:migrate`
 
@@ -52,6 +96,18 @@ Usage
 	# John wants to be friend with Mary
 	# always return a friendship object
 	john.be_friends_with(mary, "Hi Mary! I have worked with you on Meroy Merlin!")
+	
+	# Creating a new Relation kind
+	Relation.create(:name => "coworker")
+	
+	# You can pass kind of relationship, when...
+	john.be_friends_with(mary, "Hi Mary! I have worked with you on Meroy Merlin!", [:coworker])
+
+	# if you specify a non existent Relation, 
+	# it will create a new Relation
+	# and associate then to friendship 
+	john.be_friends_with(mary, "Hi Mary! I have worked with you on Meroy Merlin!", [:coworker, :friend])
+	# In this case, friend is a new relation
 
 	# are they friends?
 	john.friends?(mary) ==> false
@@ -70,13 +126,19 @@ Usage
 	# Mary can reject John's friendship.
 	mary.remove_friendship_with(john)
 	
-	# check if a user is the current user, so it can
+	# check if an user is the current user, so it can
 	# be differently presented
 	mary.friends.each {|friend| friend.is?(current_user) }
 
 	# if you're dealing with a friendship object,
 	# the following methods are available
 	friendship.accept!
+	
+	# You can specify relations when accept a friendship, so...
+	friendship.accept!([:friend])
+	
+	# If you want to accept friendship and clear current relations...
+	friendship.accept!([])
 	
 	# the be_friends_with method returns 2 params: friendship object and status.
 	# the friendship object will be present only when the friendship is created

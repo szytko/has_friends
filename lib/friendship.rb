@@ -21,6 +21,9 @@ class Friendship < ActiveRecord::Base
   belongs_to :friend, :class_name => 'User', :foreign_key => 'friend_id'
   belongs_to :message, :class_name => "FriendshipMessage", :foreign_key => "friendship_message_id"
   
+  has_many :friendship_relations, :readonly => true
+  has_many :relations, :through => :friendship_relations
+  
   # callback
   after_destroy do |f|
     User.decrement_counter(:friends_count, f.user_id)
@@ -37,11 +40,23 @@ class Friendship < ActiveRecord::Base
   def requested?
     status == FRIENDSHIP_REQUESTED
   end
-
-  def accept!
+  
+  def accept!(new_relations = nil)
     unless accepted?
       User.increment_counter(:friends_count, user.id)
       update_attribute(:status, FRIENDSHIP_ACCEPTED)
+      add_relations(new_relations) unless new_relations.nil?
+    end
+  end
+  
+  def add_relations(new_relations = [])
+    self.relations.each do |r|
+      r.destroy unless new_relations.include?(r.name.to_sym)
+    end
+    
+    new_relations.each do |r|
+      relation = Relation.find_or_create_by_name(r.to_s)
+      self.relations << relation unless self.relations.include?(relation)
     end
   end
 end

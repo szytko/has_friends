@@ -8,7 +8,7 @@ class User < ActiveRecord::Base
 end
 
 describe "has_friends" do
-  fixtures :users
+  fixtures :all
   
   describe "methods" do
     it "should respond to has_friends method" do
@@ -174,16 +174,33 @@ describe "has_friends" do
     
     it "should create friendships" do
       doing {
-        doing {
-          friendship, status = @vader.be_friends_with(@luke, "Luke, I'm your father!")
-        
-          @vader.friendships.count.should == 1
-          @luke.friendships.count.should == 1
-          status.should == Friendship::STATUS_REQUESTED
-          friendship.message.body.should == "Luke, I'm your father!"
-        
-        }.should change(Friendship, :count).by(2)
+        friendship, status = @vader.be_friends_with(@luke)
+      
+        @vader.friendships.count.should == 1
+        @luke.friendships.count.should == 1
+        status.should == Friendship::STATUS_REQUESTED
+      }.should change(Friendship, :count).by(2)
+    end
+    
+    it "should create friendship with message" do
+      doing {
+        friendship, status = @vader.be_friends_with(@luke, "Luke, I'm your father!")
+        friendship.message.body.should == "Luke, I'm your father!"
       }.should change(FriendshipMessage, :count).by(1)
+    end
+    
+    it "should create friendship with exist relations" do
+      doing {
+        doing {
+          friendship, status = @vader.be_friends_with(@luke, nil, [:met, :friend])
+        }.should change(FriendshipRelation, :count).by(4)
+      }.should_not change(Relation, :count)
+    end
+    
+    it "should create friendship with new relations" do
+      doing {
+        friendship, status = @vader.be_friends_with(@luke, nil, [:parent, :met])
+      }.should change(Relation, :count).by(1)
     end
   end
   
@@ -195,22 +212,41 @@ describe "has_friends" do
     end
   end
   
+  describe Relation do
+    it "should require a name" do
+      @relation_type = Relation.new
+      @relation_type.should_not be_valid
+      @relation_type.errors[:name].should == "can't be blank"
+    end
+  end
+  
   describe Friendship do
     describe "structure" do
-      it "should belong_to user" do
-        @friendship = Friendship.new(:user => @vader)
+      before(:each) do
+        @friendship = Friendship.new
+      end
+      
+      it "should belong to user" do
+        @friendship.user = @vader
         @friendship.user.should == @vader
       end
       
-      it "should_belong_to friend" do
-        @friendship = Friendship.new(:friend => @luke)
+      it "should_belong to friend" do
+        @friendship.friend = @luke
         @friendship.friend.should == @luke
       end
       
-      it "should belong_to message" do
+      it "should belong to message" do
         @message = FriendshipMessage.new :body => "Luke, I'm your father!"
-        @friendship = Friendship.new(:message => @vader_message_for_luke)
-        @friendship.message == @vader_message_for_luke
+        @friendship.message = @vader_message_for_luke
+        @friendship.message.should == @vader_message_for_luke
+      end
+      
+      it "should has many relations" do
+        @friendship.relations << @friend
+        @friendship.relations << @coworker
+        
+        @friendship.relations.should == [@friend, @coworker]
       end
     end
     
@@ -227,6 +263,76 @@ describe "has_friends" do
     it "should be requested status" do
       @friendship = Friendship.new(:status => 'requested')
       @friendship.should be_requested
+    end
+    
+    describe "on accept pending friendship" do
+      before(:each) do
+        @friendship = Friendship.create(:user => @vader, :friend => @luke, :status => Friendship::FRIENDSHIP_PENDING)
+      end
+
+      it "should be ok" do
+        @friendship.accept!
+        @friendship.status.should == Friendship::FRIENDSHIP_ACCEPTED
+      end
+      
+      it "should be ok and add new relations" do
+        @friendship.accept!([:met, :coworker])
+        @friendship.status.should == Friendship::FRIENDSHIP_ACCEPTED
+        @friendship.relations.size == 2
+        @friendship.relations.should == [@met, @coworker]
+      end
+      
+      describe "with relations" do
+        before(:each) do
+          [@friend, @met].each do |r|
+            @friendship.relations << r
+          end
+          @friendship.save
+        end
+        
+        it "should be ok and no change current relations" do
+          @friendship.accept!
+          @friendship.reload
+
+          @friendship.status.should == Friendship::FRIENDSHIP_ACCEPTED
+          @friendship.relations.size.should == 2
+          @friendship.relations.should == [@friend, @met]
+        end
+
+        it "should be ok and change relations" do
+          @friendship.accept!([:met, :coworker])
+          @friendship.reload
+
+          @friendship.status.should == Friendship::FRIENDSHIP_ACCEPTED
+          @friendship.relations.size.should == 2
+          @friendship.relations.should == [@met, @coworker]
+        end
+        
+        it "should be ok and clear current relations" do
+          @friendship.accept!([])
+          @friendship.reload
+
+          @friendship.status.should == Friendship::FRIENDSHIP_ACCEPTED
+          @friendship.relations.size.should == 0
+          @friendship.relations.should == []
+        end
+      end
+
+    end
+  end
+  
+  describe FriendshipRelation do
+    describe "structure" do
+      it "should belong_to :friendship" do
+        @friendship = Friendship.new
+        @friendship_relation = FriendshipRelation.new :friendship => @friendship
+        @friendship_relation.friendship.should == @friendship
+      end
+      it "should belong_to :relation" do
+        @relation = Relation.new
+        @friendship_relation = FriendshipRelation.new :relation => @relation
+        @friendship_relation.relation.should == @relation
+      end
     end
   end
   

@@ -16,7 +16,7 @@ module SimplesIdeias
     end
     
     module InstanceMethods
-      def be_friends_with(friend, message = nil)
+      def be_friends_with(friend, message = nil, relations = [])
         # no user object
         return nil, Friendship::STATUS_FRIEND_IS_REQUIRED unless friend
         
@@ -47,9 +47,11 @@ module SimplesIdeias
 
         # we didn't find a friendship, so let's create one!
         friendship = self.friendships.create(:friend_id => friend.id, :status => 'requested', :message => message)
+        friendship.add_relations(relations)
 
         # we didn't find a friendship request, so let's create it!
         request = friend.friendships.create(:friend_id => id, :status => 'pending', :message => message)
+        request.add_relations(relations)
         
         return friendship, Friendship::STATUS_REQUESTED
       end

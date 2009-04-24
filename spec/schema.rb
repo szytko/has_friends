@@ -3,6 +3,8 @@ ActiveRecord::Schema.define(:version => 0) do
     drop_table :users
     drop_table :friendships
     drop_table :friendship_messages
+    drop_table :relations
+    drop_table :friendship_relations
   rescue
   end
   
@@ -19,5 +21,17 @@ ActiveRecord::Schema.define(:version => 0) do
   
   create_table :friendship_messages do |t|
     t.string :body
+    t.timestamps
   end
+  
+  create_table :relations do |t|
+    t.string :name
+    t.timestamps
+  end
+
+  create_table :friendship_relations do |t|
+    t.references :relation, :friendship
+    t.timestamps
+  end
+  
 end
