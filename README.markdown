@@ -4,20 +4,8 @@ has_friends
 **ATTENTION:** This is a new simpler implementation. If you want to use the previous version,
 get the 1.0 tag.
 
-NOTE: You should have a User model. You should also have a `friends_count` column
-on your model. Otherwise, this won't work! You can add as following:
-
-`script/generate migration add_friends_count_to_user friends_count:integer`
-
-	class CreateFriendships < ActiveRecord::Migration
-	  def self.up
-	    add_column :users, :friends_count, :integer, :default => 0, :null => false
-	  end
-
-	  def self.down
-	    remove_column :users, :friends_count
-	  end
-	end
+NOTE: You should have a User model. When you execute the plugin generator, I'll add a column
+friends_count on users' table.
 
 
 Instalation
@@ -25,74 +13,51 @@ Instalation
 
 1) Install the plugin with `script/plugin install git://github.com/fnando/has_friends.git`
 
-2) Generate following migrations with respective codes:
+2) Execute the plugin generator `script/generate has_friends_migration`
 
-a) `script/generate migration create_relations`
-
-	class CreateRelationTypes < ActiveRecord::Migration
-		def self.up
-			create_table :relation_types do |t|
-		    t.string :name
-		    t.timestamps
-			end
-		end
-		
-		add_index :relation_types, :name
-		
-		def self.down
-    	drop_table :relation_types
-		end
-	end
-	
-b) `script/generate migration create_friendships`
-
-	class CreateFriendships < ActiveRecord::Migration
+	class CreateHasFriendsTables < ActiveRecord::Migration
 	  def self.up
-	    create_table :friendships do |t|
+	    create_table :friendships, :force => true do |t|
 	      t.references :user, :friend, :friendship_message
-	      t.datetime :requested_at, :accepted_at, :null => true, :default => nil
+	      t.datetime :requested_at, :accepted_at
 	      t.string :status
+	      t.timestamps
 	    end
     
 	    add_index :friendships, :user_id
 	    add_index :friendships, :friend_id
 	    add_index :friendships, :status
+    
+	    create_table :relation_types do |t|
+	      t.name
+	      t.timestamps
+	    end
+    
+	    add_index :relation_types, :name
+    
+	    create_table :friendship_messages do |t|
+	      t.string :body
+	      t.timestamps
+	    end
+    
+	    create_table :friendship_relation_types, :force => true do |t|
+	      t.references :relation, :friendship
+	      t.timestamps
+	    end
+    
+	    add_column :users, :friends_count, :integer, :default => 0, :null => false
 	  end
 
 	  def self.down
+	    remove_column :users, :friends_count
+    
+	    drop_table :friendship_relation_types
+	    drop_table :friendship_messages
+	    drop_table :relation_types
 	    drop_table :friendships
 	  end
 	end
-	
-c) `script/generate migration create_friendship_messages`
 
-	class CreateFriendshipMessages < ActiveRecord::Migration
-	  def self.up
-	    create_table :friendship_messages do |t|
-		    t.string :body
-		    t.timestamps
-		  end
-	  end
-
-	  def self.down
-	    drop_table :friendship_messages
-	  end
-	end
-
-d) `script/generate migration create_friendship_relations`
-
-	class CreateFriendshipRelationTypes < ActiveRecord::Migration
-	  def self.up
-	    create_table :friendship_relation_types do |t|
-		    t.references :relation, :friendship
-		    t.timestamps
-		  end
-	  end
-
-	  def self.down
-	    drop_table :friendship_relation_types
-	  end
-	end
 
 3) Run the migrations with `rake db:migrate`
 
