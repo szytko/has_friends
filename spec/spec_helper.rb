@@ -28,3 +28,10 @@ class Object
 end
 
 alias :doing :lambda
+
+# unset models used for testing purposes
+Object.unset_class('User')
+
+class User < ActiveRecord::Base
+  has_friends
+end
