@@ -30,6 +30,15 @@ describe Friendship do
 
       @friendship.relations.should == [@friend, @coworker]
     end
+    
+    it "should list relations names" do
+      @friendship.relations << @friend
+      @friendship.relations << @coworker
+      @friendship.save
+      @friendship.reload
+
+      @friendship.relation_names.should == ["coworker", "friend"]
+    end
   end
 
   it "should be pending status" do

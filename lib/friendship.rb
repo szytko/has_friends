@@ -59,4 +59,8 @@ class Friendship < ActiveRecord::Base
       self.relations << relation unless self.relations.include?(relation)
     end
   end
+  
+  def relation_names
+    relations.all(:select => :name, :order => :name).collect{|r| r.name}
+  end
 end

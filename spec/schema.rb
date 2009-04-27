@@ -3,7 +3,7 @@ ActiveRecord::Schema.define(:version => 0) do
     drop_table :users
     drop_table :friendships
     drop_table :friendship_messages
-    drop_table :relations
+    drop_table :relations_types
     drop_table :friendship_relations
   rescue
   end
