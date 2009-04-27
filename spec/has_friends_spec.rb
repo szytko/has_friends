@@ -50,6 +50,12 @@ describe "has_friends" do
       @luke.friends_count.should == 1
     end
     
+    it "should accept a friendship with relation types" do
+      doing {
+        @luke.accept_friendship_with(@vader, [:parent, :met])
+      }.should change(FriendshipRelationType, :count).by(2)
+    end
+    
     it "should reject when user try accept his friendship request" do
       lambda { @vader.accept_friendship_with(@luke) }.should raise_error(YouCanNotAcceptARequestFriendshipError)
       

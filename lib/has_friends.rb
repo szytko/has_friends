@@ -75,11 +75,12 @@ module SimplesIdeias
         end
       end
       
-      def accept_friendship_with(friend)
-        if self.friendship_for(friend).pending?
-          [friendship_for(friend), friend.friendship_for(self)].compact.each do |friendship|
-            friendship.accept! unless friendship.accepted?
-          end 
+      def accept_friendship_with(friend, relations = nil)
+        if (pendent = self.friendship_for(friend)).pending?
+          requested = friend.friendship_for(self)
+          
+          pendent.accept!(relations) 
+          requested.accept! unless requested.accepted?
         else
           raise YouCanNotAcceptARequestFriendshipError
         end
