@@ -37,21 +37,25 @@ module SimplesIdeias
         
         # friendship is pending so accept it
         if friendship && friendship.pending?
-          friendship.accept!
-          request.accept!
+          ActiveRecord::Base.transaction do
+            friendship.accept!
+            request.accept!
+          end
           
           return friendship, Friendship::STATUS_FRIENDSHIP_ACCEPTED
         end
         
-        message = FriendshipMessage.create(:body => message) if message
+        ActiveRecord::Base.transaction do
+          message = FriendshipMessage.create(:body => message) if message
 
-        # we didn't find a friendship, so let's create one!
-        friendship = self.friendships.create(:friend_id => friend.id, :status => 'requested', :message => message)
-        friendship.add_relations(relations)
+          # we didn't find a friendship, so let's create one!
+          friendship = self.friendships.create(:friend_id => friend.id, :status => 'requested', :message => message)
+          friendship.add_relations(relations)
 
-        # we didn't find a friendship request, so let's create it!
-        request = friend.friendships.create(:friend_id => id, :status => 'pending', :message => message)
-        request.add_relations(relations)
+          # we didn't find a friendship request, so let's create it!
+          request = friend.friendships.create(:friend_id => id, :status => 'pending', :message => message)
+          request.add_relations(relations)
+        end
         
         return friendship, Friendship::STATUS_REQUESTED
       end
@@ -70,8 +74,10 @@ module SimplesIdeias
       end
       
       def remove_friendship_with(friend)
-        [friendship_for(friend), friend.friendship_for(self)].compact.each do |friendship|
-          friendship.destroy if friendship
+        ActiveRecord::Base.transaction do
+          [friendship_for(friend), friend.friendship_for(self)].compact.each do |friendship|
+            friendship.destroy if friendship
+          end
         end
       end
       
@@ -79,16 +85,21 @@ module SimplesIdeias
         if (pendent = self.friendship_for(friend)).pending?
           requested = friend.friendship_for(self)
           
-          pendent.accept!(relations) 
-          requested.accept! unless requested.accepted?
+          ActiveRecord::Base.transaction do
+            pendent.accept!(relations) 
+            requested.accept! unless requested.accepted?
+          end
         else
           raise YouCanNotAcceptARequestFriendshipError
         end
       end      
+      
       private
         def destroy_all_friendships
-          Friendship.delete_all({:user_id => id})
-          Friendship.delete_all({:friend_id => id})
+          ActiveRecord::Base.transaction do
+            Friendship.delete_all({:user_id => id})
+            Friendship.delete_all({:friend_id => id})
+          end
         end
     end
   end
