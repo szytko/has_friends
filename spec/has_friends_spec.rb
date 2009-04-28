@@ -29,36 +29,62 @@ describe "has_friends" do
     before(:each) do
       #requesting friendship between @vader and @luke
       @vader.be_friends_with(@luke)
+      @leia.be_friends_with(@luke)
+      @luke.accept_friendship_with(@leia)
     end
     
     it "should accept a friendship" do
       @luke.accept_friendship_with(@vader)
-      
+
       @luke.reload
       @vader.reload
-      
+
       @vader.friends.should == [@luke]
-      @luke.friends.should == [@vader]
+      @luke.friends.should == [@vader, @leia]
       @vader.friends_count.should == 1
-      @luke.friends_count.should == 1
+      @luke.friends_count.should  == 2
     end
-    
+
     it "should accept a friendship with relation types" do
       doing {
         @luke.accept_friendship_with(@vader, [:parent, :met])
       }.should change(FriendshipRelationType, :count).by(2)
     end
-    
+
     it "should reject when user try accept his friendship request" do
-      lambda { @vader.accept_friendship_with(@luke) }.should raise_error(YouCanNotAcceptARequestFriendshipError)
-      
+      lambda { @vader.accept_friendship_with(@luke) }.should raise_error(YouCanNotJudgeARequestFriendshipError)
+
       @luke.reload
       @vader.reload
 
       @vader.friends.should == []
-      @luke.friends.should == []
+      @luke.friends.should == [@leia]
       @vader.friends_count.should == 0
-      @luke.friends_count.should == 0
+      @luke.friends_count.should  == 1
+    end
+    
+    it "should accept a friendship with relation types" do
+      @luke.deny_friendship_with(@vader)
+      
+      @luke.reload
+      @vader.reload
+      
+      @vader.friends.should == []
+      @luke.friends.should == [@leia]
+      @vader.friends_count.should == 0
+      @luke.friends_count.should  == 1
+    end
+    
+    it "should reject when user try deny his friendship request" do
+      lambda { @vader.deny_friendship_with(@luke) }.should raise_error(YouCanNotJudgeARequestFriendshipError)
+      
+      @luke.reload
+      @vader.reload
+      
+      @vader.friends.should == []
+      @luke.friends.should == [@leia]
+      @vader.friends_count.should == 0
+      @luke.friends_count.should  == 1
     end
     
     it "should remove a friendship" do
@@ -71,9 +97,9 @@ describe "has_friends" do
       @vader.reload
 
       @vader.friends.should == []
-      @luke.friends.should == []
+      @luke.friends.should == [@leia]
       @vader.friends_count.should == 0
-      @luke.friends_count.should == 0
+      @luke.friends_count.should == 1
     end
   end
   

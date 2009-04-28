@@ -26,7 +26,7 @@ class Friendship < ActiveRecord::Base
   
   # callback
   after_destroy do |f|
-    User.decrement_counter(:friends_count, f.user_id)
+    User.decrement_counter(:friends_count, f.user_id) if f.status == FRIENDSHIP_ACCEPTED
   end
   
   def pending?
@@ -40,23 +40,28 @@ class Friendship < ActiveRecord::Base
   def requested?
     status == FRIENDSHIP_REQUESTED
   end
-  
-  def accept!(new_relations = nil)
+
+  def accept!(new_relation_names = nil)
     unless accepted?
-      User.increment_counter(:friends_count, user.id)
-      update_attribute(:status, FRIENDSHIP_ACCEPTED)
-      add_relations(new_relations) unless new_relations.nil?
+      self.transaction do
+        User.increment_counter(:friends_count, user.id)
+        update_attribute(:status, FRIENDSHIP_ACCEPTED)
+        add_relations(new_relation_names) unless new_relation_names.nil?
+      end
     end
   end
   
-  def add_relations(new_relations = [])
-    self.relations.each do |r|
-      r.destroy unless new_relations.include?(r.name.to_sym)
-    end
-    
-    new_relations.each do |r|
-      relation = RelationType.find_or_create_by_name(r.to_s)
-      self.relations << relation unless self.relations.include?(relation)
+  def add_relations(new_relation_names = [])
+    self.transaction do
+      actual_relation_names = self.relation_names
+      self.friendship_relations.each do |fr|
+        fr.destroy unless actual_relation_names.include?(fr.relation.name.to_sym)
+      end
+
+      new_relation_names.each do |nr|
+        relation = RelationType.find_or_create_by_name(nr.to_s)
+        self.relations << relation unless relations.include?(relation)
+      end
     end
   end
   

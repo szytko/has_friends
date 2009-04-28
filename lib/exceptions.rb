@@ -1,1 +1,1 @@
-class YouCanNotAcceptARequestFriendshipError < StandardError; end
+class YouCanNotJudgeARequestFriendshipError < StandardError; end

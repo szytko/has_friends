@@ -81,6 +81,18 @@ module SimplesIdeias
         end
       end
       
+      def deny_friendship_with(friend)
+        if (pendent = self.friendship_for(friend)).pending?
+          ActiveRecord::Base.transaction do
+            [friendship_for(friend), friend.friendship_for(self)].compact.each do |friendship|
+              friendship.destroy if friendship
+            end
+          end
+        else
+          raise YouCanNotJudgeARequestFriendshipError
+        end
+      end
+      
       def accept_friendship_with(friend, relations = nil)
         if (pendent = self.friendship_for(friend)).pending?
           requested = friend.friendship_for(self)
@@ -90,7 +102,7 @@ module SimplesIdeias
             requested.accept! unless requested.accepted?
           end
         else
-          raise YouCanNotAcceptARequestFriendshipError
+          raise YouCanNotJudgeARequestFriendshipError
         end
       end      
       
