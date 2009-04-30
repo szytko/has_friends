@@ -11,14 +11,14 @@ class CreateHasFriendsTables < ActiveRecord::Migration
     add_index :friendships, :friend_id
     add_index :friendships, :status
     
-    create_table :relation_types do |t|
-      t.name
+    create_table :relation_types, :force => true do |t|
+      t.string :name
       t.timestamps
     end
     
     add_index :relation_types, :name
     
-    create_table :friendship_messages do |t|
+    create_table :friendship_messages, :force => true do |t|
       t.string :body
       t.timestamps
     end
