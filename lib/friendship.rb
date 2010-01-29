@@ -44,7 +44,7 @@ class Friendship < ActiveRecord::Base
   def accept!(new_relation_names = nil)
     unless accepted?
       self.transaction do
-        User.increment_counter(:friends_count, user.id)
+        User.increment_counter(:friends_count, user_id)
         update_attribute(:status, FRIENDSHIP_ACCEPTED)
         add_relations(new_relation_names) unless new_relation_names.nil?
       end
