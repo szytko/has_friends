@@ -12,9 +12,9 @@ class Friendship < ActiveRecord::Base
   FRIENDSHIP_REQUESTED = "requested"
   
   # scopes
-  named_scope :pending, :conditions => {:status => FRIENDSHIP_PENDING}
-  named_scope :accepted, :conditions => {:status => FRIENDSHIP_ACCEPTED}
-  named_scope :requested, :conditions => {:status => FRIENDSHIP_REQUESTED}
+  scope :pending, :conditions => {:status => FRIENDSHIP_PENDING}
+  scope :accepted, :conditions => {:status => FRIENDSHIP_ACCEPTED}
+  scope :requested, :conditions => {:status => FRIENDSHIP_REQUESTED}
   
   # associations
   belongs_to :user

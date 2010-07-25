@@ -1,5 +1,5 @@
 class RelationType < ActiveRecord::Base
-  validates_presence_of :name
+  validates :name, :presence => true
   
   after_destroy :destroy_all_friendsip_relations
   

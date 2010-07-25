@@ -1,8 +1,7 @@
 has_friends
 ===========
 
-**ATTENTION:** This is a new simpler implementation. If you want to use the previous version,
-get the 1.0 tag.
+**ATTENTION:** This is a Rails 3 implementation.
 
 NOTE: You should have a User model. When you execute the plugin generator, I'll add a column
 friends_count on users' table.
@@ -11,53 +10,9 @@ friends_count on users' table.
 Instalation
 -----------
 
-1) Install the plugin with `script/plugin install git://github.com/fnando/has_friends.git`
+1) Add a gem line to your Gemfile. `gem 'has_friends-rails3, :require => 'has_friends'`
 
-2) Execute the plugin generator `script/generate has_friends_migration`
-
-	class CreateHasFriendsTables < ActiveRecord::Migration
-	  def self.up
-	    create_table :friendships, :force => true do |t|
-	      t.references :user, :friend, :friendship_message
-	      t.datetime :requested_at, :accepted_at
-	      t.string :status
-	      t.timestamps
-	    end
-    
-	    add_index :friendships, :user_id
-	    add_index :friendships, :friend_id
-	    add_index :friendships, :status
-    
-	    create_table :relation_types do |t|
-	      t.name
-	      t.timestamps
-	    end
-    
-	    add_index :relation_types, :name
-    
-	    create_table :friendship_messages do |t|
-	      t.string :body
-	      t.timestamps
-	    end
-    
-	    create_table :friendship_relation_types, :force => true do |t|
-	      t.references :relation, :friendship
-	      t.timestamps
-	    end
-    
-	    add_column :users, :friends_count, :integer, :default => 0, :null => false
-	  end
-
-	  def self.down
-	    remove_column :users, :friends_count
-    
-	    drop_table :friendship_relation_types
-	    drop_table :friendship_messages
-	    drop_table :relation_types
-	    drop_table :friendships
-	  end
-	end
-
+2) Execute the plugin generator `rails g has_friends:migration`
 
 3) Run the migrations with `rake db:migrate`
 
@@ -133,10 +88,10 @@ Usage
 	
 	friendship, status = mary.be_friends_with(john)
 	
-	if status == Friends::STATUS_REQUESTED
+	if status == Friendship::STATUS_REQUESTED
 	  # the friendship has been requested
 	  Mailer.deliver_friendship_request(friendship)
-	elsif status == Friends::STATUS_ALREADY_FRIENDS
+	elsif status == Friendship::STATUS_ALREADY_FRIENDS
 	  # they're already friends
 	else
 	  # ...

@@ -1,12 +1,12 @@
-module SimplesIdeias
+module Has
   module Friends
     def self.included(base)
-      base.extend SimplesIdeias::Friends::ClassMethods
+      base.extend Has::Friends::ClassMethods
     end
     
     module ClassMethods
       def has_friends
-        include SimplesIdeias::Friends::InstanceMethods
+        include Has::Friends::InstanceMethods
         
         has_many :friendships
         has_many :friends, :through => :friendships, :source => :friend, :conditions => "friendships.status = 'accepted'"
