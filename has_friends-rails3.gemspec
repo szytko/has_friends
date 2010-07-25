@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{has_friends-rails3}
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Robert Rouse"]
-  s.date = %q{2010-07-24}
+  s.date = %q{2010-07-25}
   s.description = %q{Rails 3 version of has_friends gem}
   s.email = %q{rrouse@rachotech.com}
   s.extra_rdoc_files = [
@@ -20,11 +20,8 @@ Gem::Specification.new do |s|
      "README.markdown",
      "RakeFile",
      "VERSION",
+     "has_friends-rails3.gemspec",
      "init.rb",
-     "lib/exceptions.rb",
-     "lib/friendship.rb",
-     "lib/friendship_message.rb",
-     "lib/friendship_relation_type.rb",
      "lib/generators/has_friends.rb",
      "lib/generators/has_friends/migration/migration_generator.rb",
      "lib/generators/has_friends/migration/templates/create_has_friends_tables.rb",
