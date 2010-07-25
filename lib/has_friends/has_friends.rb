@@ -49,11 +49,11 @@ module Has
           message = FriendshipMessage.create(:body => message) if message
 
           # we didn't find a friendship, so let's create one!
-          friendship = self.friendships.create(:friend_id => friend.id, :status => 'requested', :message => message)
+          friendship = self.friendships.create(:friend_id => friend.id, :status => 'requested', :message => message, :requested_at => Time.now)
           friendship.add_relations(relations)
 
           # we didn't find a friendship request, so let's create it!
-          request = friend.friendships.create(:friend_id => id, :status => 'pending', :message => message)
+          request = friend.friendships.create(:friend_id => id, :status => 'pending', :message => message, :requested_at => Time.now)
           request.add_relations(relations)
         end
         
