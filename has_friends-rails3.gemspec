@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{has_friends-rails3}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Robert Rouse"]
@@ -26,6 +26,11 @@ Gem::Specification.new do |s|
      "lib/generators/has_friends/migration/migration_generator.rb",
      "lib/generators/has_friends/migration/templates/create_has_friends_tables.rb",
      "lib/has_friends.rb",
+     "lib/has_friends/exceptions.rb",
+     "lib/has_friends/friendship.rb",
+     "lib/has_friends/friendship_message.rb",
+     "lib/has_friends/friendship_relation_type.rb",
+     "lib/has_friends/has_friends.rb",
      "lib/relation_type.rb",
      "spec/fixtures/relation_types.yml",
      "spec/fixtures/users.yml",

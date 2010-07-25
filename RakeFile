@@ -18,7 +18,7 @@ begin
     gemspec.email = "rrouse@rachotech.com"
     gemspec.homepage = "http://github.com/rrouse/has_friends"
     gemspec.authors = ["Robert Rouse"]
-    gemspec.files.include %w(lib/generators/**/*.rb)
+    gemspec.files.include %w(lib/**/*.rb)
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: gem install jeweler"
