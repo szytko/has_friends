@@ -5,13 +5,13 @@
 
 Gem::Specification.new do |s|
   s.name = %q{has_friends-rails3}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Robert Rouse"]
-  s.date = %q{2010-07-25}
+  s.date = %q{2011-05-14}
   s.description = %q{Rails 3 version of has_friends gem}
-  s.email = %q{rrouse@rachotech.com}
+  s.email = %q{robert.e.rouse@gmail.com}
   s.extra_rdoc_files = [
     "README.markdown"
   ]
