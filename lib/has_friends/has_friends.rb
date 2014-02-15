@@ -12,9 +12,9 @@ module Has
         has_many :friends,
                  through: :friendships,
                  source: :friend,
-                 conditions: "friendships.status = 'accepted'"
+                 -> {where("friendships.status = 'accepted'")}
         has_many :friendships_awaiting_acceptance,
-                 conditions: "friendships.status = 'requested'",
+                 -> {where("friendships.status = 'requested'")},
                  class_name: 'Friendship',
                  foreign_key: :friend_id
         
@@ -83,7 +83,7 @@ module Has
       end
       
       def friendship_for(friend)
-        friendships.first conditions: {friend_id: friend.id}
+        friendships.where({friend_id: friend}).first
       end
       
       def is?(friend)
