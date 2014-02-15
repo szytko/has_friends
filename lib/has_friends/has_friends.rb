@@ -9,8 +9,14 @@ module Has
         include Has::Friends::InstanceMethods
         
         has_many :friendships
-        has_many :friends, :through => :friendships, :source => :friend, :conditions => "friendships.status = 'accepted'"
-        has_many :friendships_awaiting_acceptance, :conditions => "friendships.status = 'requested'", :class_name => 'Friendship', :foreign_key => :friend_id
+        has_many :friends,
+                 through: :friendships,
+                 source: :friend,
+                 conditions: "friendships.status = 'accepted'"
+        has_many :friendships_awaiting_acceptance,
+                 conditions: "friendships.status = 'requested'",
+                 class_name: 'Friendship',
+                 foreign_key: :friend_id
         
         after_destroy :destroy_all_friendships
       end
@@ -50,11 +56,21 @@ module Has
           message = FriendshipMessage.create(:body => message) if message
 
           # we didn't find a friendship, so let's create one!
-          friendship = self.friendships.create(:friend_id => friend.id, :status => 'requested', :message => message, :requested_at => Time.now)
+          friendship = self.friendships.create(
+              friend_id: friend.id,
+              status: 'requested',
+              message: message,
+              requested_at: Time.now
+          )
           friendship.add_relations(relations)
 
           # we didn't find a friendship request, so let's create it!
-          request = friend.friendships.create(:friend_id => id, :status => 'pending', :message => message, :requested_at => Time.now)
+          request = friend.friendships.create(
+              friend_id: id,
+              status: 'pending',
+              message: message,
+              requested_at: Time.now
+          )
           request.add_relations(relations)
         end
         
@@ -67,7 +83,7 @@ module Has
       end
       
       def friendship_for(friend)
-        friendships.first :conditions => {:friend_id => friend.id}
+        friendships.first conditions: {friend_id: friend.id}
       end
       
       def is?(friend)
@@ -110,8 +126,8 @@ module Has
       private
         def destroy_all_friendships
           ActiveRecord::Base.transaction do
-            Friendship.delete_all({:user_id => id})
-            Friendship.delete_all({:friend_id => id})
+            Friendship.delete_all({user_id: id})
+            Friendship.delete_all({friend_id: id})
           end
         end
     end

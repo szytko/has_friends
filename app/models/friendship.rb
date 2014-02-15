@@ -12,17 +12,28 @@ class Friendship < ActiveRecord::Base
   FRIENDSHIP_REQUESTED = "requested"
   
   # scopes
-  scope :pending, :conditions => {:status => FRIENDSHIP_PENDING}
-  scope :accepted, :conditions => {:status => FRIENDSHIP_ACCEPTED}
-  scope :requested, :conditions => {:status => FRIENDSHIP_REQUESTED}
+  scope :pending, -> {where(status: FRIENDSHIP_PENDING)}
+  scope :accepted, -> {where(status: FRIENDSHIP_ACCEPTED)}
+  scope :requested, -> {where(status: FRIENDSHIP_REQUESTED)}
   
   # associations
   belongs_to :user
-  belongs_to :friend, :class_name => 'User', :foreign_key => 'friend_id'
-  belongs_to :message, :class_name => "FriendshipMessage", :foreign_key => "friendship_message_id", :dependent => :destroy
+  belongs_to :friend,
+             class_name: 'User',
+             foreign_key: 'friend_id'
+  belongs_to :message,
+             class_name: "FriendshipMessage",
+             foreign_key: "friendship_message_id",
+             dependent: :destroy
   
-  has_many :friendship_relations, :class_name => "FriendshipRelationType", :readonly => true, :dependent => :destroy
-  has_many :relations, :through => :friendship_relations, :class_name => "RelationType", :source => :relation
+  has_many :friendship_relations,
+           class_name: "FriendshipRelationType",
+           readonly: true,
+           dependent: :destroy
+  has_many :relations,
+           through: :friendship_relations,
+           class_name: "RelationType",
+           source: :relation
   
   # callback
   after_destroy do |f|
