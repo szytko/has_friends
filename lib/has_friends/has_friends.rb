@@ -9,10 +9,12 @@ module Has
         include Has::Friends::InstanceMethods
         
         has_many :friendships
+
         has_many :friends,
+                 -> {where("friendships.status = 'accepted'")},
                  through: :friendships,
-                 source: :friend,
-                 -> {where("friendships.status = 'accepted'")}
+                 source: :friend
+
         has_many :friendships_awaiting_acceptance,
                  -> {where("friendships.status = 'requested'")},
                  class_name: 'Friendship',
