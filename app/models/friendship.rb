@@ -29,7 +29,7 @@ class Friendship < ActiveRecord::Base
              dependent: :destroy
   
   has_many :friendship_relations,
-           -> {where(readonly: true)},
+           -> {readonly},
            class_name: "FriendshipRelationType",
            dependent: :destroy
 
