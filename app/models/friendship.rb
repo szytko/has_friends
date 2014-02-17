@@ -84,3 +84,28 @@ class Friendship < ActiveRecord::Base
     relations.order(:name).collect{|r| r.name}
   end
 end
+
+# Friendship Errors
+class Friendship::ExistsError < StandardError
+
+end
+
+class Friendship::NotFoundError < StandardError
+
+end
+
+class Friendship::InvitationError < StandardError
+
+end
+
+class Friendship::AcceptError < StandardError
+
+end
+
+class Friendship::DenyError < StandardError
+
+end
+
+class Friendship::RemoveError < StandardError
+
+end
