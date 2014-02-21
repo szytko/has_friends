@@ -42,6 +42,20 @@ class Friendship < ActiveRecord::Base
   after_destroy do |f|
     User.decrement_counter(:friends_count, f.user_id) if f.status == FRIENDSHIP_ACCEPTED
   end
+
+  # Sends notifications to devices
+  after_create {
+    update_revision(self.user, 'create')
+    update_revision(self.friend, 'create')
+  }
+  after_update {
+    update_revision(self.user, 'update')
+    update_revision(self.friend, 'update')
+  }
+  after_destroy {
+    update_revision(self.user, 'delete')
+    update_revision(self.friend, 'delete')
+  }
   
   def pending?
     status == FRIENDSHIP_PENDING
