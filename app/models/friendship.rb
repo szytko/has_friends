@@ -1,4 +1,7 @@
 class Friendship < ActiveRecord::Base
+
+  include HasRevisions
+
   # constants
   STATUS_ALREADY_FRIENDS     = 1
   STATUS_ALREADY_REQUESTED   = 2
