@@ -1,5 +1,20 @@
 class Friendship < ActiveRecord::Base
 
+  # Default serializer
+  include ActiveModel::Serializers::JSON
+
+  # Serializable attributes
+  def attributes
+    {
+        id: nil,
+        accepted_at: nil,
+        friend: nil,
+        user: nil,
+        status: nil,
+        created_at: nil
+    }
+  end
+
   include HasRevisions
 
   # constants
